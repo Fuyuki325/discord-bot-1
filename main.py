@@ -25,6 +25,18 @@ async def send_message(message: Message, user_message: str) -> None:
     if not user_message:
         print('(Message was empty because intents were not enabled probably)')
         return
+
+    if is_private := user_message[0] == '?':
+        user_message = user_message[1:]
+        try:
+            response: str = get_response(user_message, message)
+            if is_private:
+                await message.author.send(response)
+            else:
+                await message.channel.send(response)
+        except Exception as e:
+            print(e)
+
     if username == 'fuyuki325':
         if 'love' in user_message:
             await message.channel.send('I love you too Fuyuki❤️')
@@ -37,6 +49,9 @@ async def send_message(message: Message, user_message: str) -> None:
             return
         if 'im ' in user_message:
             await message.channel.send("That's cool Fuyuki!")
+            return
+        if 'cute' in user_message:
+            await message.channel.send("I am cute! thank u FYK!")
             return
 
     if any(word in user_message for word in keyWords):
@@ -61,6 +76,11 @@ async def send_message(message: Message, user_message: str) -> None:
     if 'hi' in user_message:
         await message.channel.send("Hello there! I'm Fuyuki's girlfriend")
         return
+
+    if 'cute' in user_message:
+        await message.channel.send("ONLY Fuyuki can call me cute!")
+        return
+
     if 'roll dice' in user_message:
         await message.channel.send(f'You rolled: {randint(1, 6)}')
         return
@@ -68,9 +88,6 @@ async def send_message(message: Message, user_message: str) -> None:
     # 30/30 chance it won't say anything
     if randint(1, 30) < 30:
         return
-
-    if is_private := user_message[0] == '?':
-        user_message = user_message[1:]
 
     try:
         response: str = get_response(user_message, message)
@@ -87,7 +104,7 @@ async def on_ready() -> None:
     print(f'{client.user} is now running!')
     general_channel = client.get_channel(int(general))
     #if general_channel:
-    #    await general_channel.send("Can't wait to hop on Apex!")
+    #    await general_channel.send("Good morning Fuyuki! I can't wait for you to build me that neural network!")
     while True:
         await asyncio.sleep(180)  # 180 seconds = 3 minutes
         await send_afk_message(general_channel)
@@ -101,7 +118,7 @@ async def on_message(message: Message) -> None:
     user_message: str = message.content
     channel: str = str(message.channel)
 
-    # print(f'[{channel}] {username}: "{user_message}"')
+    print(f'[{channel}] {username}: "{user_message}"')
     await send_message(message, user_message)
 
 # STEP 5: Main entry point
