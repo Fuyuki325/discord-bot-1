@@ -63,8 +63,9 @@ async def send_message(message: Message, user_message: str) -> None:
 
 # STEP 3: Handle startup
 @client.event
-async def on_ready() -> None:
-   print(f'{client.user} is now running!')
+async def on_ready(message: Message) -> None:
+    print(f'{client.user} is now running!')
+    await message.channel.send("Good morning Fuyuki!")
 
 
 # STEP 4: handling incoming messages
