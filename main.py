@@ -7,8 +7,50 @@ from afkResponses import send_afk_message
 from random import choice, randint
 import asyncio
 
+
+
+
 # load token
 load_dotenv()
+
+CHAR_ID = os.getenv('CHAR_ID')
+CHARACTER_AI_TOKEN = os.getenv('CHARACTER_AI_TOKEN')
+
+from characterai import aiocai, sendCode, authUser
+import asyncio
+
+async def start_character_ai():
+    char = CHAR_ID
+
+    client = aiocai.Client(CHARACTER_AI_TOKEN)
+
+    me = await client.get_me()
+
+    async with await client.connect() as chat:
+        new, answer = await chat.new_chat(
+            char, me.id
+        )
+
+        print(f'{answer.name}: {answer.text}')
+        
+        while True:
+            text = input('YOU: ')
+
+            message = await chat.send_message(
+                char, new.chat_id, text
+            )
+
+            print(f'{message.name}: {message.text}')
+
+
+
+
+
+
+
+
+
+
 TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
 general = os.getenv('GENERAL')
 
@@ -122,8 +164,9 @@ async def on_message(message: Message) -> None:
     await send_message(message, user_message)
 
 # STEP 5: Main entry point
-def main() -> None:
+async def main() -> None:
+    await start_character_ai()
     client.run(token=TOKEN)
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
