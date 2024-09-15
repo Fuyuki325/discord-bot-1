@@ -30,32 +30,38 @@ discord_client: Client = Client(intents=intents)
 # Global variables for Character AI
 chat = None
 chat_id = None
+me = None
 
 # Function to handle messages
 async def send_message(message: Message, user_message: str) -> None:
     if message.author == discord_client.user:
         return
-
-    # Use Character AI API to get a response
-    try:
-        if chat and SPECIFIC_CHAT_ID:
-            response = await chat.send_message(CHAR_ID, SPECIFIC_CHAT_ID, user_message)
-            await message.channel.send(response.text)
-        else:
-            await message.channel.send("Character AI client is not initialized properly.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        await message.channel.send("Sorry, something went wrong.")
+    if chat:
+        try:
+            if SPECIFIC_CHAT_ID:
+                response = await chat.send_message(CHAR_ID, SPECIFIC_CHAT_ID, user_message)
+                await message.channel.send(response.text)
+            else:
+                await message.channel.send("SPECIFIC_CHAT_ID is not set.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            await message.channel.send("Sorry, something went wrong.")
+    else:
+        await message.channel.send("Character AI client is not initialized properly.")
 
 @discord_client.event
 async def on_ready() -> None:
-    global chat, chat_id
+    global chat, me
     print(f'{discord_client.user} is now running!')
     general_channel = discord_client.get_channel(int(GENERAL_CHANNEL_ID))
     if not chat:
         _, chat, CHAR_ID, me = await start_character_ai()
-        # Initialize chat with existing chat ID
-        # If SPECIFIC_CHAT_ID is not valid or needs a new one, handle it accordingly
+        # Initialize chat with existing chat ID if needed
+        if not SPECIFIC_CHAT_ID:
+            new_chat, _ = await chat.new_chat(CHAR_ID, me.id)
+            SPECIFIC_CHAT_ID = new_chat.id
+
+    # You can uncomment this if you need to send AFK messages periodically
     # while True:
     #     await asyncio.sleep(180)  # 180 seconds = 3 minutes
     #     await send_afk_message(general_channel)
@@ -73,7 +79,7 @@ async def on_message(message: Message) -> None:
 async def main():
     global chat
     # Initialize Character AI client
-    chat_client, chat, CHAR_ID, me = await start_character_ai()
+    _, chat, CHAR_ID, me = await start_character_ai()
     
     # Start Discord bot
     await discord_client.start(DISCORD_TOKEN)
