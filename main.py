@@ -36,6 +36,9 @@ me = None
 async def send_message(message: Message, user_message: str) -> None:
     if message.author == discord_client.user:
         return
+    if message.channel.id == int(GENERAL_CHANNEL_ID):
+        return
+
     if chat:
         try:
             if SPECIFIC_CHAT_ID:
